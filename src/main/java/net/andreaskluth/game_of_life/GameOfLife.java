@@ -9,14 +9,46 @@ public class GameOfLife {
   private final boolean[][] grid;
   private final int columns;
   private final int rows;
+  private final int maxStage;
+  private int stages;
 
-  public GameOfLife(boolean[][] initialGrid) {
+  public GameOfLife(boolean[][] initialGrid, int maxStage) {
     if (initialGrid.length == 0) {
-      throw new IllegalStateException("Not really a grid");
+      throw new IllegalArgumentException("initialGrid must be a 2d array");
     }
+    if (maxStage < 0) {
+      throw new IllegalArgumentException("maxStage must not be negative");
+    }
+
     this.grid = copy(initialGrid);
     this.rows = initialGrid.length;
     this.columns = initialGrid[0].length;
+    this.maxStage = maxStage;
+  }
+
+  public void runAndRender() {
+    render(this.grid);
+    while (true) {
+      if (this.stages == maxStage) {
+        return;
+      }
+      render(nextGeneration());
+      this.stages++;
+    }
+  }
+
+  private void render(boolean[][] nextGeneration) {
+    System.out.println();
+    for (boolean[] rows : grid) {
+      for (boolean isAlive : rows) {
+        if (isAlive) {
+          System.out.print("█");
+        } else {
+          System.out.print("▓");
+        }
+      }
+      System.out.println();
+    }
   }
 
   public boolean[][] nextGeneration() {

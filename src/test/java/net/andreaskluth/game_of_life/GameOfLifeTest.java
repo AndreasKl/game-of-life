@@ -10,18 +10,18 @@ class GameOfLifeTest {
   @Test
   void validateGenerations() {
     var seedGrid = new boolean[][]{
-        {false, false, false, false},
+        {true, false, false, false},
         {false, true, true, false},
         {false, false, false, false},
         {false, false, true, false}
     };
 
-    var gameOfLife = new GameOfLife(seedGrid);
+    var gameOfLife = new GameOfLife(seedGrid, Integer.MAX_VALUE);
 
     var firstGeneration = gameOfLife.nextGeneration();
     var expectedFirst = new boolean[][]{
-        {false, false, false, false},
-        {false, false, false, false},
+        {false, true, false, false},
+        {false, true, false, false},
         {false, true, true, false},
         {false, false, false, false}
     };
@@ -30,11 +30,20 @@ class GameOfLifeTest {
     var secondGeneration = gameOfLife.nextGeneration();
     var expectedSecond = new boolean[][]{
         {false, false, false, false},
-        {false, false, false, false},
-        {false, false, false, false},
+        {true, true, false, false},
+        {false, true, true, false},
         {false, false, false, false}
     };
     assertThat(secondGeneration).isDeepEqualTo(expectedSecond);
+
+    var thirdGeneration = gameOfLife.nextGeneration();
+    var expectedThird = new boolean[][]{
+        {false, false, false, false},
+        {true, true, true, false},
+        {true, true, true, false},
+        {false, false, false, false}
+    };
+    assertThat(thirdGeneration).isDeepEqualTo(expectedThird);
   }
 
   @Test
