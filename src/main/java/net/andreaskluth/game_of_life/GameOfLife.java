@@ -10,7 +10,6 @@ public class GameOfLife {
   private final int columns;
   private final int rows;
   private final int maxStage;
-  private int stages;
 
   public GameOfLife(boolean[][] initialGrid, int maxStage) {
     if (initialGrid.length == 0) {
@@ -27,36 +26,32 @@ public class GameOfLife {
   }
 
   public void runAndRender() {
-    render(this.grid);
+    render(0, grid);
+    int currentStage = 0;
     while (true) {
-      if (this.stages == maxStage) {
+      if (currentStage == maxStage) {
         return;
       }
-      render(nextGeneration());
-      this.stages++;
+      render(++currentStage, nextGeneration());
     }
   }
 
-  private void render(boolean[][] nextGeneration) {
-    System.out.println();
-    for (boolean[] rows : grid) {
-      for (boolean isAlive : rows) {
-        if (isAlive) {
-          System.out.print("█");
-        } else {
-          System.out.print("▓");
-        }
+  private static void render(int stage, boolean[][] grid) {
+    System.out.printf("Generation: %d%n", stage);
+    for (var rows : grid) {
+      for (var isAlive : rows) {
+        System.out.print(isAlive ? "█" : "▓");
       }
       System.out.println();
     }
   }
 
   public boolean[][] nextGeneration() {
-    boolean[][] workingCopy = copy(this.grid);
+    boolean[][] immutableCopy = copy(this.grid);
     for (int row = 0; row < rows; row++) {
       for (int column = 0; column < columns; column++) {
-        var neighbours = checkNeighbours(workingCopy, row, column);
-        grid[row][column] = deadOrAlive(workingCopy[row][column], neighbours);
+        var neighbours = checkNeighbours(immutableCopy, row, column);
+        grid[row][column] = deadOrAlive(immutableCopy[row][column], neighbours);
       }
     }
     return copy(grid);
@@ -69,12 +64,12 @@ public class GameOfLife {
     return neighbours.alive() == 3;
   }
 
-  private Neighbours checkNeighbours(boolean[][] workingCopy, int locationX, int locationY) {
+  private Neighbours checkNeighbours(boolean[][] immutableCopy, int locationX, int locationY) {
     var coordinates =
         filterInvalid(coordinates(locationX, locationY), this.rows, this.columns);
 
     var count =
-        coordinates.stream().filter(c -> workingCopy[c.x()][c.y()]).count();
+        coordinates.stream().filter(c -> immutableCopy[c.x()][c.y()]).count();
     return new Neighbours(count);
   }
 
