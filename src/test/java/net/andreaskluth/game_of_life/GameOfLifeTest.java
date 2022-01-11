@@ -48,7 +48,7 @@ class GameOfLifeTest {
 
   @Test
   void coordinatesShouldCalculateSurrounding() {
-    var coordinates = GameOfLife.coordinates(1, 1);
+    var coordinates = GameOfLife.possibleCoordinates(1, 1);
     assertThat(coordinates.size()).isEqualTo(8);
     assertThat(coordinates).contains(new Coordinate(0, 0));
   }

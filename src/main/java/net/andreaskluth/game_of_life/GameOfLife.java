@@ -3,13 +3,14 @@ package net.andreaskluth.game_of_life;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class GameOfLife {
 
-  private final boolean[][] grid;
+  private final int maxStage;
   private final int columns;
   private final int rows;
-  private final int maxStage;
+  private final boolean[][] grid;
 
   public GameOfLife(boolean[][] initialGrid, int maxStage) {
     if (initialGrid.length == 0) {
@@ -20,29 +21,19 @@ public class GameOfLife {
     }
 
     this.grid = copy(initialGrid);
-    this.rows = initialGrid.length;
-    this.columns = initialGrid[0].length;
+    this.rows = this.grid.length;
+    this.columns = this.grid[0].length;
     this.maxStage = maxStage;
   }
 
-  public void runAndRender() {
-    render(0, grid);
+  public void runAndRender(BiConsumer<Integer, boolean[][]> renderer) {
+    renderer.accept(0, grid);
     int currentStage = 0;
     while (true) {
       if (currentStage == maxStage) {
         return;
       }
-      render(++currentStage, nextGeneration());
-    }
-  }
-
-  private static void render(int stage, boolean[][] grid) {
-    System.out.printf("Generation: %d%n", stage);
-    for (var rows : grid) {
-      for (var isAlive : rows) {
-        System.out.print(isAlive ? "█" : "▓");
-      }
-      System.out.println();
+      renderer.accept(++currentStage, nextGeneration());
     }
   }
 
@@ -64,16 +55,17 @@ public class GameOfLife {
     return neighbours.alive() == 3;
   }
 
-  private Neighbours checkNeighbours(boolean[][] immutableCopy, int locationX, int locationY) {
+  private Neighbours checkNeighbours(boolean[][] immutableGrid, int locationX, int locationY) {
     var coordinates =
-        filterInvalid(coordinates(locationX, locationY), this.rows, this.columns);
+        filterOffGridCoordinates(possibleCoordinates(locationX, locationY), this.rows,
+            this.columns);
 
     var count =
-        coordinates.stream().filter(c -> immutableCopy[c.x()][c.y()]).count();
+        coordinates.stream().filter(c -> immutableGrid[c.x()][c.y()]).count();
     return new Neighbours(count);
   }
 
-  static List<Coordinate> coordinates(int locationX, int locationY) {
+  static List<Coordinate> possibleCoordinates(int locationX, int locationY) {
     var coordinates = new ArrayList<Coordinate>();
     for (int x = locationX - 1; x <= locationX + 1; x++) {
       for (int y = locationY - 1; y <= locationY + 1; y++) {
@@ -86,7 +78,9 @@ public class GameOfLife {
     return coordinates;
   }
 
-  static List<Coordinate> filterInvalid(List<Coordinate> coordinates, int maxX, int maxY) {
+  static List<Coordinate> filterOffGridCoordinates(
+      List<Coordinate> coordinates, int maxX, int maxY
+  ) {
     return coordinates.stream()
         .filter(c -> c.x() >= 0)
         .filter(c -> c.x() < maxX)
